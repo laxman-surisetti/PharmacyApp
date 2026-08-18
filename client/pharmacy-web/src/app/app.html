@@ -1,0 +1,21 @@
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="wordmark" routerLink="/medicines">
+      <span class="mark" aria-hidden="true">+</span>
+      <span>
+        <strong>{{ appName }}</strong>
+        <small>Medicine tracking &amp; sales</small>
+      </span>
+    </a>
+
+    <nav aria-label="Main">
+      <a routerLink="/medicines" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Stock</a>
+      <a routerLink="/sales" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Sales</a>
+      <a routerLink="/sales/new" routerLinkActive="active">New sale</a>
+    </nav>
+  </div>
+</header>
+
+<main class="page">
+  <router-outlet />
+</main>

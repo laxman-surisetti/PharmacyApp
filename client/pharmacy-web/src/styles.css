@@ -1,0 +1,452 @@
+/* ---------------------------------------------------------------------------
+   ABC Pharmacy - global stylesheet.
+
+   Component stylesheets are kept deliberately thin (the CLI budgets them at 4kB)
+   so the shared vocabulary - colours, table, form controls, buttons - lives here
+   in one place.
+   --------------------------------------------------------------------------- */
+
+:root {
+  --ink: #1b2230;
+  --ink-soft: #55617a;
+  --line: #dfe4ee;
+  --surface: #ffffff;
+  --canvas: #f4f6fb;
+  --brand: #0b6b5e;
+  --brand-dark: #084f46;
+  --brand-tint: #e6f2f0;
+
+  /* FR-04 / FR-05 colour bands. Deliberately pale so black body text keeps a
+     contrast ratio above 4.5:1 (WCAG 2.2 AA) on top of them. */
+  --critical-bg: #fdecec;
+  --critical-bg-hover: #fbdede;
+  --critical-line: #c0392b;
+  --warning-bg: #fdf6dd;
+  --warning-bg-hover: #fbf0c6;
+  --warning-line: #a07d12;
+
+  --radius: 10px;
+  --shadow: 0 1px 2px rgba(20, 30, 60, 0.06), 0 8px 24px rgba(20, 30, 60, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--canvas);
+  color: var(--ink);
+  font: 15px/1.5 "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0 0 0.35em;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: 1.5rem;
+}
+
+h2 {
+  font-size: 1.15rem;
+}
+
+a {
+  color: var(--brand);
+}
+
+/* ---------------------------------------------------------------- layout */
+
+.page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 28px 24px 64px;
+}
+
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.page-head p {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.row-flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.muted {
+  color: var(--ink-soft);
+}
+
+.small {
+  font-size: 0.85rem;
+}
+
+/* ------------------------------------------------------------------ tiles */
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.tile {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+
+.tile .value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.tile .label {
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tile.critical {
+  border-left-color: var(--critical-line);
+}
+
+.tile.warning {
+  border-left-color: var(--warning-line);
+}
+
+.tile.brand {
+  border-left-color: var(--brand);
+}
+
+/* ------------------------------------------------------------------ table */
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+table.grid {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+table.grid th,
+table.grid td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+table.grid thead th {
+  background: #eef1f7;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  position: sticky;
+  top: 0;
+}
+
+table.grid tbody tr:last-child td {
+  border-bottom: none;
+}
+
+table.grid td.num,
+table.grid th.num {
+  text-align: right;
+}
+
+/* Sortable column headers are real buttons so they are keyboard reachable. */
+th button.sort {
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  font: inherit;
+  color: inherit;
+}
+
+th button.sort:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* FR-04: red for expiry inside 30 days. FR-05: yellow for stock under 10.
+   Red wins when both apply - the server decides which, this file only paints. */
+tr.row-critical {
+  background: var(--critical-bg);
+}
+
+tr.row-warning {
+  background: var(--warning-bg);
+}
+
+tr.row-critical:hover {
+  background: #fbdede;
+}
+
+tr.row-warning:hover {
+  background: var(--warning-bg-hover);
+}
+
+/* ----------------------------------------------------------------- badges */
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.badge.critical {
+  background: #fbdede;
+  border-color: var(--critical-line);
+  color: #8c2318;
+}
+
+.badge.warning {
+  background: var(--warning-bg-hover);
+  border-color: var(--warning-line);
+  color: #6d5308;
+}
+
+.badge.ok {
+  background: var(--brand-tint);
+  border-color: #9ec9c1;
+  color: var(--brand-dark);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+.swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  margin-right: 6px;
+  vertical-align: -2px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.swatch.critical {
+  background: var(--critical-bg);
+  border-color: var(--critical-line);
+}
+
+.swatch.warning {
+  background: var(--warning-bg);
+  border-color: var(--warning-line);
+}
+
+/* ---------------------------------------------------------------- controls */
+
+label.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  min-width: 0;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--brand);
+  outline-offset: 0;
+  border-color: var(--brand);
+}
+
+input.invalid,
+select.invalid,
+textarea.invalid {
+  border-color: var(--critical-line);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 84px;
+}
+
+.field-error {
+  color: #8c2318;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.form-grid .span-2 {
+  grid-column: 1 / -1;
+}
+
+/* ---------------------------------------------------------------- buttons */
+
+button.btn,
+a.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+button.btn:hover:not(:disabled),
+a.btn:hover {
+  border-color: #c3ccdd;
+  background: #f7f9fd;
+}
+
+button.btn.primary,
+a.btn.primary {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+}
+
+button.btn.primary:hover:not(:disabled),
+a.btn.primary:hover {
+  background: var(--brand-dark);
+  border-color: var(--brand-dark);
+}
+
+button.btn.danger {
+  color: #8c2318;
+  border-color: #e6bcb6;
+}
+
+button.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+button.btn.link {
+  border-color: transparent;
+  background: transparent;
+  color: var(--brand);
+  padding: 4px 6px;
+}
+
+button.btn.small,
+a.btn.small {
+  padding: 4px 10px;
+  font-size: 0.85rem;
+}
+
+/* ------------------------------------------------------------ messages */
+
+.alert {
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  border: 1px solid;
+  font-size: 0.9rem;
+}
+
+.alert.error {
+  background: var(--critical-bg);
+  border-color: var(--critical-line);
+  color: #8c2318;
+}
+
+.alert.success {
+  background: var(--brand-tint);
+  border-color: #9ec9c1;
+  color: var(--brand-dark);
+}
+
+.empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.pager {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 12px 4px 0;
+}

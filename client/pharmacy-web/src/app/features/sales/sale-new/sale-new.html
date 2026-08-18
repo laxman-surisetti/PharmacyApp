@@ -1,0 +1,134 @@
+<div class="page-head">
+  <div>
+    <h1>Record a sale</h1>
+    <p>Stock is decremented on the server as part of the same operation that writes the sale.</p>
+  </div>
+  <div class="row-flex">
+    <a class="btn" routerLink="/sales">Sales history</a>
+    <a class="btn" routerLink="/medicines">Back to stock</a>
+  </div>
+</div>
+
+@if (error(); as message) {
+  <div class="alert error" role="alert" style="margin-bottom: 14px">{{ message }}</div>
+}
+
+@if (lastSale(); as sale) {
+  <div class="alert success" role="status" style="margin-bottom: 14px">
+    Recorded sale <strong>{{ sale.saleNumber }}</strong> for {{ formatMoney(sale.totalAmount) }} at
+    {{ formatTimestamp(sale.soldAtUtc) }}.
+    <a routerLink="/sales">View in sales history</a>
+  </div>
+}
+
+<div class="sale-layout">
+  <section class="card stack">
+    <h2>Add to the sale</h2>
+
+    @if (loading()) {
+      <p class="muted">Loading the catalogue…</p>
+    } @else {
+      <label class="field">
+        <span>Medicine</span>
+        <select
+          name="medicine"
+          [ngModel]="selectedId"
+          (ngModelChange)="onSelectionChange($event)"
+        >
+          <option value="">— choose a medicine —</option>
+          @for (medicine of catalogue(); track medicine.id) {
+            <option [value]="medicine.id" [disabled]="medicine.quantity <= 0">
+              {{ medicine.fullName }} · {{ medicine.brand }} ({{ medicine.quantity }} in stock)
+            </option>
+          }
+        </select>
+      </label>
+
+      @if (selected(); as medicine) {
+        <div class="selected-detail small">
+          <span>Unit price <strong>{{ formatMoney(medicine.price) }}</strong></span>
+          <span>In stock <strong>{{ medicine.quantity }}</strong></span>
+          <span>Expires <strong>{{ formatIsoDate(medicine.expiryDate) }}</strong></span>
+          @if (medicine.expiryStatus !== 'Ok') {
+            <span class="badge critical">
+              {{ medicine.expiryStatus === 'Expired' ? 'Expired - do not dispense' : 'Expiring soon' }}
+            </span>
+          }
+        </div>
+      }
+
+      <label class="field" style="max-width: 180px">
+        <span>Quantity</span>
+        <input type="number" name="quantity" min="1" step="1" [(ngModel)]="quantity" />
+      </label>
+
+      @if (lineError(); as message) {
+        <span class="field-error">{{ message }}</span>
+      }
+
+      <div>
+        <button type="button" class="btn primary" (click)="addLine()" [disabled]="!selectedId">Add to sale</button>
+      </div>
+    }
+  </section>
+
+  <section class="card stack">
+    <h2>This sale</h2>
+
+    @if (basket().length === 0) {
+      <p class="muted">Nothing added yet.</p>
+    } @else {
+      <div class="table-wrap" style="box-shadow: none">
+        <table class="grid">
+          <thead>
+            <tr>
+              <th>Medicine</th>
+              <th class="num">Qty</th>
+              <th class="num">Unit price</th>
+              <th class="num">Line total</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of basket(); track line.medicineId) {
+              <tr>
+                <td>
+                  <strong>{{ line.name }}</strong>
+                  <div class="small muted">{{ line.brand }}</div>
+                </td>
+                <td class="num">{{ line.quantity }}</td>
+                <td class="num">{{ formatMoney(line.unitPrice) }}</td>
+                <td class="num">{{ formatMoney(line.unitPrice * line.quantity) }}</td>
+                <td class="num">
+                  <button type="button" class="btn small link" (click)="removeLine(line.medicineId)">Remove</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="total-row">
+        <span>Total</span>
+        <strong>{{ formatMoney(total()) }}</strong>
+      </div>
+    }
+
+    <div class="form-grid">
+      <label class="field">
+        <span>Sold by</span>
+        <input type="text" name="soldBy" placeholder="Counter staff name" [(ngModel)]="soldBy" />
+      </label>
+      <label class="field">
+        <span>Notes</span>
+        <input type="text" name="notes" placeholder="e.g. Counter sale" [(ngModel)]="notes" />
+      </label>
+    </div>
+
+    <div>
+      <button type="button" class="btn primary" [disabled]="saving() || basket().length === 0" (click)="submit()">
+        {{ saving() ? 'Recording…' : 'Record sale' }}
+      </button>
+    </div>
+  </section>
+</div>

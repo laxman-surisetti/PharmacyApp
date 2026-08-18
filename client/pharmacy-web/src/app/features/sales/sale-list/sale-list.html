@@ -1,0 +1,99 @@
+<div class="page-head">
+  <div>
+    <h1>Sales</h1>
+    <p>Every sale recorded through the application, newest first. Expand a row to see the lines.</p>
+  </div>
+  <a class="btn primary" routerLink="/sales/new">Record a sale</a>
+</div>
+
+@if (error(); as message) {
+  <div class="alert error" role="alert" style="margin-bottom: 12px">{{ message }}</div>
+}
+
+<div class="table-wrap">
+  <table class="grid">
+    <thead>
+      <tr>
+        <th>Sale</th>
+        <th>When</th>
+        <th>Sold by</th>
+        <th>Contents</th>
+        <th class="num">Total</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (sale of rows(); track sale.id) {
+        <tr>
+          <td>
+            <strong>{{ sale.saleNumber }}</strong>
+            @if (sale.notes) {
+              <div class="small muted">{{ sale.notes }}</div>
+            }
+          </td>
+          <td>{{ formatTimestamp(sale.soldAtUtc) }}</td>
+          <td>{{ sale.soldBy ?? '—' }}</td>
+          <td>{{ lineSummary(sale) }}</td>
+          <td class="num">{{ formatMoney(sale.totalAmount) }}</td>
+          <td class="num">
+            <button type="button" class="btn small link" (click)="toggle(sale.id)">
+              {{ expandedId() === sale.id ? 'Hide' : 'Details' }}
+            </button>
+          </td>
+        </tr>
+
+        @if (expandedId() === sale.id) {
+          <tr class="detail-row">
+            <td colspan="6">
+              <table class="grid inner">
+                <thead>
+                  <tr>
+                    <th>Medicine</th>
+                    <th>Brand</th>
+                    <th class="num">Qty</th>
+                    <th class="num">Unit price</th>
+                    <th class="num">Line total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (line of sale.lines; track line.medicineId) {
+                    <tr>
+                      <td>{{ line.medicineName }}</td>
+                      <td>{{ line.brand }}</td>
+                      <td class="num">{{ line.quantity }}</td>
+                      <td class="num">{{ formatMoney(line.unitPrice) }}</td>
+                      <td class="num">{{ formatMoney(line.lineTotal) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+              <p class="small muted" style="margin: 8px 0 0">
+                Unit prices are the prices captured at the moment of sale, not today's catalogue prices.
+              </p>
+            </td>
+          </tr>
+        }
+      } @empty {
+        <tr>
+          <td colspan="6">
+            <div class="empty">
+              @if (loading()) {
+                Loading sales…
+              } @else {
+                No sales recorded yet.
+              }
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<div class="pager">
+  <button type="button" class="btn small" [disabled]="!canPrevious()" (click)="goToPage(page() - 1)">‹ Previous</button>
+  <span class="muted small">Page {{ page() }} of {{ totalPages() || 1 }} · {{ totalCount() }} sale(s)</span>
+  <button type="button" class="btn small" [disabled]="!canNext()" (click)="goToPage(page() + 1)">Next ›</button>
+  <span class="spacer"></span>
+  <span class="muted small">This page: {{ formatMoney(pageTotal()) }}</span>
+</div>

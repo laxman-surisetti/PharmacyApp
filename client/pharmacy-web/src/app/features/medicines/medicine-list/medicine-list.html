@@ -1,0 +1,165 @@
+<div class="page-head">
+  <div>
+    <h1>Medicine stock</h1>
+    <p>Every medicine held in the system. Red rows expire within 30 days, yellow rows are running low.</p>
+  </div>
+
+  <div class="row-flex">
+    <a class="btn" routerLink="/sales/new">Record a sale</a>
+    <a class="btn primary" routerLink="/medicines/new">Add medicine</a>
+  </div>
+</div>
+
+@if (summary(); as s) {
+  <div class="tiles" style="margin-bottom: 16px">
+    <div class="tile brand">
+      <div class="value">{{ s.totalMedicines }}</div>
+      <div class="label">Medicines</div>
+    </div>
+    <div class="tile critical">
+      <div class="value">{{ s.expiringSoonCount }}</div>
+      <div class="label">Expiring in 30 days</div>
+    </div>
+    <div class="tile critical">
+      <div class="value">{{ s.expiredCount }}</div>
+      <div class="label">Already expired</div>
+    </div>
+    <div class="tile warning">
+      <div class="value">{{ s.lowStockCount }}</div>
+      <div class="label">Low stock</div>
+    </div>
+    <div class="tile">
+      <div class="value">{{ formatMoney(s.totalStockValue) }}</div>
+      <div class="label">Stock value</div>
+    </div>
+  </div>
+}
+
+<div class="toolbar">
+  <label class="field search-field">
+    <span>Search by medicine name</span>
+    <span class="search-input">
+      <input
+        type="search"
+        placeholder="e.g. amoxicillin"
+        autocomplete="off"
+        [formControl]="searchControl"
+      />
+      @if (searchControl.value) {
+        <button type="button" class="btn link" (click)="clearSearch()" aria-label="Clear search">Clear</button>
+      }
+    </span>
+  </label>
+
+  <div class="spacer"></div>
+
+  <p class="legend">
+    <span><i class="swatch critical"></i>Expires in under 30 days</span>
+    <span><i class="swatch warning"></i>Fewer than 10 in stock</span>
+  </p>
+</div>
+
+@if (error(); as message) {
+  <div class="alert error" role="alert" style="margin-bottom: 12px">{{ message }}</div>
+}
+
+@if (notice(); as message) {
+  <div class="alert success" role="status" style="margin-bottom: 12px">{{ message }}</div>
+}
+
+<div class="table-wrap">
+  <table class="grid">
+    <caption class="sr-only">
+      Medicines in stock, with expiry and stock-level warnings
+    </caption>
+    <thead>
+      <tr>
+        <th [attr.aria-sort]="ariaSort('name')">
+          <button type="button" class="sort" (click)="sort('name')">Medicine {{ sortIndicator('name') }}</button>
+        </th>
+        <th [attr.aria-sort]="ariaSort('brand')">
+          <button type="button" class="sort" (click)="sort('brand')">Brand {{ sortIndicator('brand') }}</button>
+        </th>
+        <th [attr.aria-sort]="ariaSort('expiryDate')">
+          <button type="button" class="sort" (click)="sort('expiryDate')">
+            Expiry date {{ sortIndicator('expiryDate') }}
+          </button>
+        </th>
+        <th class="num" [attr.aria-sort]="ariaSort('quantity')">
+          <button type="button" class="sort" (click)="sort('quantity')">Quantity {{ sortIndicator('quantity') }}</button>
+        </th>
+        <th class="num" [attr.aria-sort]="ariaSort('price')">
+          <button type="button" class="sort" (click)="sort('price')">Price {{ sortIndicator('price') }}</button>
+        </th>
+        <th [attr.aria-sort]="ariaSort('severity')">
+          <button type="button" class="sort" (click)="sort('severity')">Status {{ sortIndicator('severity') }}</button>
+        </th>
+        <th aria-label="Actions"></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      @for (row of rows(); track row.id) {
+        <tr [class]="rowClass(row.rowSeverity)">
+          <td>
+            <strong>{{ row.fullName }}</strong>
+          </td>
+          <td>{{ row.brand }}</td>
+          <td>
+            {{ formatIsoDate(row.expiryDate) }}
+            <div class="small muted">{{ describeDaysToExpiry(row.daysToExpiry) }}</div>
+          </td>
+          <td class="num">{{ row.quantity }}</td>
+          <td class="num">{{ formatMoney(row.price) }}</td>
+          <td>
+            <span [class]="badgeClass(row)">{{ statusLabel(row) }}</span>
+          </td>
+          <td class="actions">
+            @if (pendingDeleteId() === row.id) {
+              <span class="small">Remove?</span>
+              <button type="button" class="btn small danger" (click)="remove(row)">Yes, remove</button>
+              <button type="button" class="btn small" (click)="cancelDelete()">Cancel</button>
+            } @else {
+              <a class="btn small" [routerLink]="['/sales/new']" [queryParams]="{ medicineId: row.id }">Sell</a>
+              <a class="btn small" [routerLink]="['/medicines', row.id, 'edit']">Edit</a>
+              <button type="button" class="btn small link" (click)="confirmDelete(row.id)">Remove</button>
+            }
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="7">
+            <div class="empty">
+              @if (loading()) {
+                Loading stock…
+              } @else if (searchControl.value) {
+                No medicine matches “{{ searchControl.value }}”.
+              } @else {
+                No medicines yet. Use <strong>Add medicine</strong> to create the first one.
+              }
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<div class="pager">
+  <button type="button" class="btn small" [disabled]="!canPrevious()" (click)="goToPage(page() - 1)">
+    ‹ Previous
+  </button>
+  <span class="muted small">{{ rangeLabel() }}</span>
+  <button type="button" class="btn small" [disabled]="!canNext()" (click)="goToPage(page() + 1)">Next ›</button>
+
+  <span class="spacer"></span>
+
+  <label class="field" style="flex-direction: row; align-items: center; gap: 8px">
+    <span>Rows per page</span>
+    <select [value]="pageSize()" (change)="changePageSize($any($event.target).value)">
+      <option value="10">10</option>
+      <option value="25">25</option>
+      <option value="50">50</option>
+    </select>
+  </label>
+</div>

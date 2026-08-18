@@ -1,0 +1,96 @@
+<div class="page-head">
+  <div>
+    <h1>{{ isEdit ? 'Edit medicine' : 'Add medicine' }}</h1>
+    <p>
+      {{ isEdit ? 'Update the catalogue record.' : 'Register a new medicine in the catalogue.' }}
+      Name and brand together must be unique.
+    </p>
+  </div>
+  <a class="btn" routerLink="/medicines">Back to stock</a>
+</div>
+
+@if (error(); as message) {
+  <div class="alert error" role="alert" style="margin-bottom: 14px">{{ message }}</div>
+}
+
+@if (loading()) {
+  <div class="card">Loading…</div>
+} @else {
+  <form class="card stack" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="form-grid">
+      <label class="field span-2">
+        <span>Full name of the medicine *</span>
+        <input
+          type="text"
+          formControlName="fullName"
+          placeholder="e.g. Amoxicillin 500mg Capsule"
+          [class.invalid]="isInvalid('fullName')"
+        />
+        @if (errorFor('fullName'); as message) {
+          <span class="field-error">{{ message }}</span>
+        }
+      </label>
+
+      <label class="field">
+        <span>Brand *</span>
+        <input type="text" formControlName="brand" placeholder="e.g. MediCore" [class.invalid]="isInvalid('brand')" />
+        @if (errorFor('brand'); as message) {
+          <span class="field-error">{{ message }}</span>
+        }
+      </label>
+
+      <label class="field">
+        <span>Expiry date *</span>
+        <input type="date" formControlName="expiryDate" [class.invalid]="isInvalid('expiryDate')" />
+        @if (errorFor('expiryDate'); as message) {
+          <span class="field-error">{{ message }}</span>
+        } @else {
+          <span class="small muted">Rows go red once this is under 30 days away.</span>
+        }
+      </label>
+
+      <label class="field">
+        <span>Quantity in stock *</span>
+        <input type="number" formControlName="quantity" min="0" step="1" [class.invalid]="isInvalid('quantity')" />
+        @if (errorFor('quantity'); as message) {
+          <span class="field-error">{{ message }}</span>
+        } @else {
+          <span class="small muted">Rows go yellow below 10 units.</span>
+        }
+      </label>
+
+      <label class="field">
+        <span>Unit price *</span>
+        <input type="number" formControlName="price" min="0" step="0.01" [class.invalid]="isInvalid('price')" />
+        @if (errorFor('price'); as message) {
+          <span class="field-error">{{ message }}</span>
+        } @else {
+          <span class="small muted">Two decimal places.</span>
+        }
+      </label>
+
+      <label class="field span-2">
+        <span>Notes</span>
+        <textarea
+          formControlName="notes"
+          placeholder="Storage conditions, pack size, dispensing warnings…"
+          [class.invalid]="isInvalid('notes')"
+        ></textarea>
+        @if (errorFor('notes'); as message) {
+          <span class="field-error">{{ message }}</span>
+        } @else {
+          <span class="small muted">Kept on the record but deliberately not shown in the grid.</span>
+        }
+      </label>
+    </div>
+
+    <div class="row-flex">
+      <button type="submit" class="btn primary" [disabled]="saving()">
+        {{ saving() ? 'Saving…' : isEdit ? 'Save changes' : 'Add medicine' }}
+      </button>
+      <a class="btn" routerLink="/medicines">Cancel</a>
+      <span class="spacer"></span>
+      <span class="small muted">* required</span>
+    </div>
+  </form>
+}

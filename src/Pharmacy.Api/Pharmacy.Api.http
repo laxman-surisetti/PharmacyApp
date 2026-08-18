@@ -1,0 +1,59 @@
+@host = http://localhost:5136
+
+### The grid, most urgent first (FR-01, FR-02)
+GET {{host}}/api/v1/medicines?page=1&pageSize=10
+Accept: application/json
+
+### Search by name (FR-07)
+GET {{host}}/api/v1/medicines?search=amox
+Accept: application/json
+
+### Sort by soonest expiry
+GET {{host}}/api/v1/medicines?sortBy=expiryDate&sortDir=asc
+
+### Dashboard counts
+GET {{host}}/api/v1/medicines/summary
+
+### Add a medicine (FR-03)
+POST {{host}}/api/v1/medicines
+Content-Type: application/json
+
+{
+  "fullName": "Paracetamol 500mg Tablet",
+  "notes": "Store below 25 C. Blister pack of 10.",
+  "expiryDate": "2027-11-30",
+  "quantity": 250,
+  "price": 3.40,
+  "brand": "HealWell"
+}
+
+### The same name and brand again - expect 409 problem+json
+POST {{host}}/api/v1/medicines
+Content-Type: application/json
+
+{
+  "fullName": "Paracetamol 500mg Tablet",
+  "notes": null,
+  "expiryDate": "2028-01-31",
+  "quantity": 10,
+  "price": 3.40,
+  "brand": "HealWell"
+}
+
+### Record a sale (FR-06) - replace the id with one from the grid
+POST {{host}}/api/v1/sales
+Content-Type: application/json
+
+{
+  "lines": [
+    { "medicineId": "00000000-0000-0000-0000-000000000000", "quantity": 2 }
+  ],
+  "soldBy": "Nimal",
+  "notes": "Counter sale"
+}
+
+### Sales history
+GET {{host}}/api/v1/sales?page=1&pageSize=10
+
+### Health
+GET {{host}}/health

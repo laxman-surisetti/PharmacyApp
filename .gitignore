@@ -1,0 +1,19 @@
+# .NET
+bin/
+obj/
+*.user
+
+# The JSON stores are runtime data, not source. Delete them to re-seed.
+src/Pharmacy.Api/App_Data/
+*.json.tmp
+
+# Angular
+node_modules/
+dist/
+.angular/
+
+# Editors
+.vs/
+.idea/
+*.swp
+.DS_Store
